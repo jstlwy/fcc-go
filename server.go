@@ -352,7 +352,8 @@ func openShortURL(w http.ResponseWriter, r *http.Request) {
 }
 
 
-// Process requests to add a user,
+// For the Exercise Tracker API,
+// process requests to add a user,
 // add an exercise to a user's log,
 // get exercise logs for a specific user,
 // or get all the data in the database.
@@ -405,6 +406,7 @@ func handleExerciseUsersPath(w http.ResponseWriter, r *http.Request) {
 		w.Write(logUpdatedReceipt)
 	case len(requestDestination) > 0 && r.Method == "POST":
 		// Add an exercise to a specific user's log
+		// First, get the data from the form that the user posted
 		id := r.Form.Get(":_id")
 		description := r.Form.Get("description")
 		duration := r.Form.Get("duration")

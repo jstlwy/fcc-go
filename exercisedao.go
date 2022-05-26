@@ -8,8 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	//"go.mongodb.org/mongo-driver/mongo/options"
-	//"go.mongodb.org/mongo-driver/mongo/readpref"
 	"log"
 	"os"
 	"strconv"
@@ -328,7 +326,7 @@ func getExerciseLogsFromUser(userID string, fromDate string, toDate string, limi
 		log.Printf("Error in %s with Collection.Aggregate: %s\n", funcName, err)
 	}
 
-	//
+	// Initialize a byte slice that will hold the JSON to be returned
 	var docJSON []byte
 
 	// Get the resulting document from the cursor
@@ -336,9 +334,10 @@ func getExerciseLogsFromUser(userID string, fromDate string, toDate string, limi
 		var doc ExerciseUserRecord
 		if err = cursor.Decode(&doc); err != nil {
 			log.Printf("Error in %s with Cursor.Decode: %s\n", funcName, err)
+			errorString := `{"error":"Cursor.Decode failed"}`
+			docJSON = []byte(errorString)
 		} else {
-			// The "log" field in the document is an array,
-			// so we must iterate through it.
+			// Convert the document to JSON
 			docJSON, err = json.Marshal(doc)
 			if err != nil {
 				log.Printf("Error in %s with json.Marshal: %s\n", funcName, err)
@@ -354,6 +353,7 @@ func getExerciseLogsFromUser(userID string, fromDate string, toDate string, limi
 			log.Printf("Error in %s with Collection.FindOne: %s\n", funcName, err)
 			return []byte(`{"error":"invalid user"}`)
 		} else {
+			// Convert the document to JSON
 			docJSON, err = json.Marshal(foundDoc)
 			if err != nil {
 				log.Printf("Error in %s with json.Marshal: %s\n", funcName, err)
