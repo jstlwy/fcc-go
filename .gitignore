@@ -1,0 +1,13 @@
+# macOS-specific
+.DS_Store
+
+# Environment variables, etc.
+.env
+mongo.txt
+
+# Executables
+fcc-go
+
+# Directories
+jsref/
+uploads/
