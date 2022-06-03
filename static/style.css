@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato&family=Roboto+Mono&display=swap');
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -10,124 +12,37 @@ body {
 }
 
 body {
-  background-color: #ECF0F1;
-  font-family: Arial, sans-serif;
+  background-color: #272748;
+  font-family: Lato, sans-serif;
+  color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
 }
 
-/*
-.container {
-  margin: auto;
+h1 {
+  font-family: Roboto Mono, monospace;
 }
 
-.page-title {
-  font-family: Montserrat, sans-serif;
-  text-align: center;
-  margin-bottom: 0.5em;
+.main-nav {
+	border-radius: 7px;
+	background-color: #101034;
+	margin: 30px;
+	padding: 30px;
+}
+
+.main-nav li {
+	padding: 10px;
+	list-style-type: none;
+}
+
+.main-nav a {
   color: white;
-  text-shadow: 3px 3px 2px black;
+	text-decoration: none;
 }
 
-.timer {
-  margin: 0 auto 0 auto;
-  width: 500px;
-  background-color: black;
-  border-radius: 5px;
-  text-transform: uppercase;
-  padding: 20px;
+.main-nav a:hover {
+  color: gray;
 }
 
-.adjustment-cluster {
-  width: 50%;
-}
-
-.length-adjustments {
-  display: flex;
-  flex-direction: row;
-  color: white;
-}
-
-.control-button,
-.length-label {
-  font-family: Roboto, sans-serif;
-  font-size: 16px;
-}
-
-.length-label {
-  text-align: center;
-}
-
-.length-button-row {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-}
-
-.length-button {
-  width: 50%;
-  border: 1px solid white;
-  border-right: none;
-  text-align: center;
-}
-
-#session-decrement {
-  border-right: 1px solid white;
-}
-
-.timer-screen {
-  background-color: #320000;
-  border-radius: 2px;
-  margin: 20px 0;
-  padding: 15px 0;
-  font-family: "Inconsolata", monospace;
-  color: red;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.length-display-row {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-}
-
-.length-display-row > p {
-  width: 50%;
-  text-align: center;
-  font-size: 24px;
-}
-
-#timer-label {
-  font-size: 32px;
-}
-
-#time-left {
-  font-size: 72px;
-}
-
-.timer-controls {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-button {
-  border: none;
-  padding: 15px 0 15px 0;
-  background-color: black;
-  border: solid 1px white;
-  color: white;
-  text-transform: uppercase;
-  cursor: pointer;
-  width: 50%;
-}
-
-#reset {
-  border-left: none;
-}
-*/
