@@ -367,7 +367,7 @@ func handleExerciseUsersPath(w http.ResponseWriter, r *http.Request) {
 
 	//log.Printf("User's request URI: %s\n", r.URL.Path)
 	requestDestination := strings.TrimPrefix(r.URL.Path, "/exercise/users/")
-	//log.Printf("User's request destination: %s\n", requestDestination)
+	log.Printf("User's request: %s %s\n", r.Method, requestDestination)
 
 	if len(requestDestination) == 0 && r.Method == "GET" {
 		// Get all user info
@@ -382,29 +382,32 @@ func handleExerciseUsersPath(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error in %s: %s\n", funcName, err)
 	}
 
-	switch {
-	case len(requestDestination) == 0 && r.Method == "POST":
+	if len(requestDestination) == 0 && r.Method == "POST" {
 		// Add a new user
 		username := r.Form.Get("username")
-		//log.Printf("Request to add new exercise user: %s\n", username)
 		log.Println("Request to add new exercise user.")
 		newUserRecord := createExerciseUser(username)
 		w.Write(newUserRecord)
-	case len(requestDestination) > 0 && r.Method == "GET":
+	} else if len(requestDestination) > 0 && r.Method == "GET" {
+		var logUpdatedReceipt []byte
 		// Get exercise logs for a specific user
-		// First, get the user ID from the URI
+		// First, check if there were any query parameters
 		slashIndex := strings.Index(requestDestination, "/")
-		id := requestDestination[:slashIndex]
-		// Next, extract the query parameters (if there were any)
-		q := r.URL.Query()
-		fromDate := q.Get("from")
-		toDate := q.Get("to")
-		numRecordsToReturn := q.Get("limit")
-		log.Println("Request for logs for a specific exercise user.")
-		//log.Printf("{_id: %s, from: %s, to: %s, limit: %s}\n", id, fromDate, toDate, numRecordsToReturn)
-		logUpdatedReceipt := getExerciseLogsFromUser(id, fromDate, toDate, numRecordsToReturn)
+		if slashIndex == -1 {
+			// No query parameters, so pass empty strings
+			logUpdatedReceipt = getExerciseLogsFromUser(requestDestination, "", "", "")
+		} else {
+			// The user ID comes before the slash, so extract it
+			id := requestDestination[:slashIndex]
+			// Now extract whatever search query parameters were passed
+			q := r.URL.Query()
+			fromDate := q.Get("from")
+			toDate := q.Get("to")
+			numRecordsToReturn := q.Get("limit")
+			logUpdatedReceipt = getExerciseLogsFromUser(id, fromDate, toDate, numRecordsToReturn)
+		}
 		w.Write(logUpdatedReceipt)
-	case len(requestDestination) > 0 && r.Method == "POST":
+	} else if len(requestDestination) > 0 && r.Method == "POST" {
 		// Add an exercise to a specific user's log
 		// First, get the data from the form that the user posted
 		id := r.Form.Get(":_id")
@@ -415,7 +418,7 @@ func handleExerciseUsersPath(w http.ResponseWriter, r *http.Request) {
 		log.Printf("{_id: %s, description: %s, duration: %s, date: %s}\n", id, description, duration, date)
 		logAddedReceipt := addExerciseToUser(id, description, duration, date)
 		w.Write(logAddedReceipt)
-	default:
+	} else {
 		http.NotFound(w, r)
 	}
 }
