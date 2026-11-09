@@ -15,14 +15,14 @@ func loadEnvVars() {
 
 	// Open the .env file
 	file, openErr := os.Open(filename)
-    if openErr != nil {
-		log.Fatal("Error when opening .env file: %s\n", openErr)
-    }
-    defer file.Close()
+	if openErr != nil {
+		log.Fatalf("Error when opening .env file: %s\n", openErr)
+	}
+	defer file.Close()
 
-	// Create a scanner with which to read from the file line by line 
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
+	// Create a scanner with which to read from the file line by line
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
 		// Get the current line
 		currentLine := scanner.Text()
 		// Get the index of the first occurrence of "=".
@@ -34,11 +34,10 @@ func loadEnvVars() {
 		// Save the key and value in the environment variables
 		setEnvErr := os.Setenv(key, value)
 		if setEnvErr != nil {
-			log.Fatal("Error when adding environment variable: %s\n", setEnvErr)
+			log.Fatalf("Error when adding environment variable: %s\n", setEnvErr)
 		}
-    }
-    if scanErr := scanner.Err(); scanErr != nil {
-		log.Fatal("Error when scanning .env file: %s\n", scanErr)
+	}
+	if scanErr := scanner.Err(); scanErr != nil {
+		log.Fatalf("Error when scanning .env file: %s\n", scanErr)
 	}
 }
-

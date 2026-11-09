@@ -6,8 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-    "go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"net"
 	"net/http"
@@ -16,6 +14,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ErrorMessage struct {
@@ -23,7 +24,7 @@ type ErrorMessage struct {
 }
 
 type WhoamiStruct struct {
-	IpAddress string `json:"ipaddress"`
+	IPAddress string `json:"ipaddress"`
 	Language  string `json:"language"`
 	UserAgent string `json:"software"`
 }
@@ -36,23 +37,21 @@ type DateStruct struct {
 type FileMetadataStruct struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
-	Size int64 `json:"size"`
+	Size int64  `json:"size"`
 }
 
 var mongoClient *mongo.Client
-
 
 func init() {
 	loadEnvVars()
 	var err error
 	mongoClient, err = mongo.Connect(context.TODO(), options.Client().ApplyURI(os.Getenv("DB_URI")))
 	if err != nil {
-		log.Fatal("Error when connecting to MongoDB: %s\n", err)
+		log.Fatalf("Error when connecting to MongoDB: %s\n", err)
 	}
 	initURLCollection()
 	initExerciseCollection()
 }
-
 
 func main() {
 	mux := http.NewServeMux()
@@ -88,10 +87,9 @@ func main() {
 
 	port := "8000"
 	log.Printf("Starting app on port %s.\n", port)
-	err := http.ListenAndServe("localhost:" + port, mux)
+	err := http.ListenAndServe("localhost:"+port, mux)
 	log.Fatal(err)
 }
-
 
 // Prints everything in the HTTP request object.
 func getRequestInfo(w http.ResponseWriter, r *http.Request) {
@@ -120,7 +118,6 @@ func getRequestInfo(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "\nURL path: %q\n", r.URL.Path)
 }
 
-
 // Responds with a simple greeting in JSON format.
 func sendJSONGreeting(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request for JSON greeting.\n")
@@ -128,7 +125,6 @@ func sendJSONGreeting(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, `{"greeting":"Hello, world!"}`)
 }
-
 
 // Returns a JSON object containing the visitor's
 // IP address, accept-language, and user-agent
@@ -138,7 +134,7 @@ func getVisitorInfo(w http.ResponseWriter, r *http.Request) {
 	// Extract all relevant info from the request object
 	ipAddr, _, _ := net.SplitHostPort(r.RemoteAddr)
 	var response WhoamiStruct
-	response.IpAddress = ipAddr
+	response.IPAddress = ipAddr
 	response.Language = r.Header.Get("Accept-Language")
 	response.UserAgent = r.Header.Get("User-Agent")
 	fmt.Printf("%+v\n", response)
@@ -152,12 +148,12 @@ func getVisitorInfo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 // Returns a JSON object containing the current date or a user-specified date
 // in both UNIX format (seconds since epoch) and RFC1123 format.
 // Example:
 // { "unix": 1451001600000,
-//    "utc": "Fri, 25 Dec 2015 00:00:00 GMT" }
+//
+//	"utc": "Fri, 25 Dec 2015 00:00:00 GMT" }
 func getDate(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request for the time in JSON.\n")
 	funcName := "getDate"
@@ -176,13 +172,9 @@ func getDate(w http.ResponseWriter, r *http.Request) {
 		if seconds, err := strconv.ParseInt(dateParam, 10, 64); err == nil {
 			// Successfully converted to int, so this should be seconds since epoch
 			parsedTime := time.Unix(seconds, 0)
-			if err != nil {
-				log.Printf("Error in %s: %s\n", funcName, err)
-			} else {
-				response.UNIXDate = parsedTime.Unix()
-				response.UTCDate = parsedTime.Format(time.RFC1123)
-				dateCouldBeParsed = true
-			}
+			response.UNIXDate = parsedTime.Unix()
+			response.UTCDate = parsedTime.Format(time.RFC1123)
+			dateCouldBeParsed = true
 		} else {
 			// Failed at converting to int, so this might be a %Y-%m-%d date
 			parsedTime, err := time.Parse("2006-01-02", dateParam)
@@ -216,7 +208,6 @@ func getDate(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error in %s: %s\n", funcName, err)
 	}
 }
-
 
 // Processes a file uploaded by the user and returns a JSON object
 // with the file's original name, [MIME] type, and size.
@@ -269,7 +260,6 @@ func getFileMetadata(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
 // Given a URL, creates a short URL and sends it to the user in a JSON object
 func createShortURL(w http.ResponseWriter, r *http.Request) {
 	log.Println("Request to create short URL.")
@@ -317,20 +307,19 @@ func createShortURL(w http.ResponseWriter, r *http.Request) {
 
 	// Dial the original URL
 	/*
-	conn, err := net.Dial("tcp", urlObject.Hostname() + ":http")
-	if err != nil {
-		log.Printf("Error in %s: %s\n", funcName, err)
-	} else {
-		conn.Close()
-		log.Println("Got a response from the server when dialing the URL.")
-	}
+		conn, err := net.Dial("tcp", urlObject.Hostname() + ":http")
+		if err != nil {
+			log.Printf("Error in %s: %s\n", funcName, err)
+		} else {
+			conn.Close()
+			log.Println("Got a response from the server when dialing the URL.")
+		}
 	*/
 
 	// Attempt to add it to the database
 	resultJSON := insertURL(strings.TrimPrefix(originalURL, "http://"))
 	w.Write(resultJSON)
 }
-
 
 // Given a short URL, finds the corresponding original URL and redirects to it
 func openShortURL(w http.ResponseWriter, r *http.Request) {
@@ -345,12 +334,11 @@ func openShortURL(w http.ResponseWriter, r *http.Request) {
 	originalURL := getOriginalURL(shortURL)
 	log.Printf("Redirecting to: %s\n", originalURL)
 	if !strings.HasPrefix(originalURL, "http://") {
-		http.Redirect(w, r, "http://" + originalURL, 307)
+		http.Redirect(w, r, "http://"+originalURL, 307)
 	} else {
 		http.Redirect(w, r, originalURL, 307)
 	}
 }
-
 
 // For the Exercise Tracker API,
 // process requests to add a user,
@@ -419,4 +407,3 @@ func handleExerciseUsersPath(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 }
-

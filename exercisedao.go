@@ -5,19 +5,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var exerciseCollection *mongo.Collection
 
 type ExerciseUser struct {
-	ID		 string `json:"_id" bson:"_id"`
+	ID       string `json:"_id" bson:"_id"`
 	Username string `json:"username" bson:"username"`
 }
 
@@ -30,12 +31,12 @@ type ExerciseRecord struct {
 type ExerciseUserRecord struct {
 	ID       string           `json:"_id" bson:"_id"`
 	Username string           `json:"username" bson:"username"`
-	Log		 []ExerciseRecord `json:"log,omitempty" bson:"log"`
+	Log      []ExerciseRecord `json:"log,omitempty" bson:"log"`
 }
 
 type ExerciseAddedReceipt struct {
-	ID			string    `json:"_id" bson:"_id"`
-	Username	string    `json:"username" bson:"username"`
+	ID          string    `json:"_id" bson:"_id"`
+	Username    string    `json:"username" bson:"username"`
 	Description string    `json:"description" bson:"description"`
 	Duration    int       `json:"duration" bson:"duration"`
 	Date        time.Time `json:"date" bson:"date"`
@@ -50,14 +51,13 @@ var (
 
 	regroupStage = bson.M{
 		"$group": bson.M{
-			"_id": "$_id",
+			"_id":      "$_id",
 			"username": bson.M{"$first": "$username"},
-			"count": bson.M{"$first": "$count"},
-			"log": bson.M{"$push": "$log"},
+			"count":    bson.M{"$first": "$count"},
+			"log":      bson.M{"$push": "$log"},
 		},
 	}
 )
-
 
 // Connect to the MongoDB database and get a reference to the exercise collection
 func initExerciseCollection() {
@@ -67,7 +67,6 @@ func initExerciseCollection() {
 		log.Fatal("Failed to get pointer to exercise collection.\n")
 	}
 }
-
 
 // Add a new user to the database, then return its ID
 func createExerciseUser(uname string) []byte {
@@ -105,7 +104,6 @@ func createExerciseUser(uname string) []byte {
 	return newUserJSON
 }
 
-
 // Return the records of every user in the database
 func getAllExerciseData() []byte {
 	log.Println("Attempting to retrieve all exercise user data.")
@@ -137,7 +135,6 @@ func getAllExerciseData() []byte {
 	log.Printf("%d users' records will be returned.\n", len(userCollection))
 	return userCollectionAsJSON
 }
-
 
 // Add a single exercise to an existing user's log
 func addExerciseToUser(userID string, desc string, duration string, date string) []byte {
@@ -178,8 +175,8 @@ func addExerciseToUser(userID string, desc string, duration string, date string)
 	// This object will be added to the user's log in the database.
 	newExercise := ExerciseRecord{
 		Description: desc,
-		Duration: durationValue,
-		Date: dateObject,
+		Duration:    durationValue,
+		Date:        dateObject,
 	}
 	log.Printf("Adding exercise: %+v\n", newExercise)
 
@@ -210,7 +207,6 @@ func addExerciseToUser(userID string, desc string, duration string, date string)
 	}
 	return receiptInJSON
 }
-
 
 // Return all the exercises for a specific user matching the given search criteria
 func getExerciseLogsFromUser(userID string, fromDate string, toDate string, limit string) []byte {
@@ -363,4 +359,3 @@ func getExerciseLogsFromUser(userID string, fromDate string, toDate string, limi
 
 	return docJSON
 }
-

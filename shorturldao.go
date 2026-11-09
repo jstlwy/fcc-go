@@ -1,21 +1,22 @@
-// Handles the database operations for the URL Shortener API. 
+// Handles the database operations for the URL Shortener API.
 package main
 
 import (
 	"context"
 	"encoding/json"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"os"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var urlCollection *mongo.Collection
 
 type urlDBRecord struct {
-	ID			 primitive.ObjectID `bson:"_id,omitempty"`
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
 	OriginalURL  string             `bson:"original_url"`
 	ShortURL     string             `bson:"short_url"`
 	TimesVisited int                `bson:"times_visited"`
@@ -26,7 +27,6 @@ type urlReceipt struct {
 	ShortURL    string `json:"short_url" bson:"short_url"`
 }
 
-
 // Get a pointer to the URL collection
 func initURLCollection() {
 	log.Println("Getting reference to URL collection.")
@@ -36,12 +36,12 @@ func initURLCollection() {
 	}
 }
 
-
 // Takes a pre-verified URL, creates a short URL for it,
 // and inserts both into the database.
-// Returns a JSON object containing both, e.g.: 
+// Returns a JSON object containing both, e.g.:
 // { original_url: "https://freeCodeCamp.org",
-//      short_url: 1 }
+//
+//	short_url: 1 }
 func insertURL(newURL string) []byte {
 	funcName := "insertURL"
 
@@ -62,8 +62,8 @@ func insertURL(newURL string) []byte {
 
 	// Now add the new record to the database.
 	newDoc := urlDBRecord{
-		OriginalURL: newURL,
-		ShortURL: shortURL,
+		OriginalURL:  newURL,
+		ShortURL:     shortURL,
 		TimesVisited: 0,
 	}
 	log.Printf("Attempting to add this record to the database:\n%+v\n", newDoc)
@@ -73,7 +73,7 @@ func insertURL(newURL string) []byte {
 	if err != nil && mongo.IsDuplicateKeyError(err) {
 		// This URL is already in the database, so find its record
 		var oldDoc urlReceipt
-		err = urlCollection.FindOne(context.TODO(), bson.M{"original_url":newURL}).Decode(&oldDoc)
+		err = urlCollection.FindOne(context.TODO(), bson.M{"original_url": newURL}).Decode(&oldDoc)
 		if err != nil {
 			log.Printf("Error in %s with Collection.FindOne: %s\n", funcName, err)
 		}
@@ -100,7 +100,7 @@ func insertURL(newURL string) []byte {
 	// Finally, return JSON object showing original and short URLs
 	receipt := urlReceipt{
 		OriginalURL: newURL,
-		ShortURL: shortURL,
+		ShortURL:    shortURL,
 	}
 	receiptJSON, err := json.Marshal(receipt)
 	if err != nil {
@@ -114,7 +114,6 @@ func insertURL(newURL string) []byte {
 	}
 	return receiptJSON
 }
-
 
 // Search for a short URL and return its corresponding original URL.
 func getOriginalURL(sURL string) string {
@@ -145,4 +144,3 @@ func getOriginalURL(sURL string) string {
 
 	return foundDoc.OriginalURL
 }
-
