@@ -236,7 +236,7 @@ func getFileMetadata(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// Get the file type
-	var contentTypeArray []string = fileHeader.Header["Content-Type"]
+	contentTypeArray := fileHeader.Header["Content-Type"]
 	var contentType string
 	if len(contentTypeArray) > 0 {
 		contentType = contentTypeArray[0]
@@ -334,9 +334,9 @@ func openShortURL(w http.ResponseWriter, r *http.Request) {
 	originalURL := getOriginalURL(shortURL)
 	log.Printf("Redirecting to: %s\n", originalURL)
 	if !strings.HasPrefix(originalURL, "http://") {
-		http.Redirect(w, r, "http://"+originalURL, 307)
+		http.Redirect(w, r, "http://"+originalURL, http.StatusTemporaryRedirect)
 	} else {
-		http.Redirect(w, r, originalURL, 307)
+		http.Redirect(w, r, originalURL, http.StatusTemporaryRedirect)
 	}
 }
 
